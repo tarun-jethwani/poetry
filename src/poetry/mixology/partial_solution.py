@@ -36,7 +36,7 @@ class PartialSolution:
         # negative Assignments that refer to that package.
         #
         # This is derived from self._assignments.
-        self._positive: dict[str, Term] = {}
+        self._positive: dict[str, Term | None] = {}
 
         # The union of all negative Assignments for each package.
         #
@@ -44,7 +44,7 @@ class PartialSolution:
         # map.
         #
         # This is derived from self._assignments.
-        self._negative: dict[str, dict[str, Term]] = {}
+        self._negative: dict[str, dict[str, Term | None]] = {}
 
         # The number of distinct solutions that have been attempted so far.
         self._attempted_solutions = 1
@@ -69,7 +69,7 @@ class PartialSolution:
         return [
             term.dependency
             for term in self._positive.values()
-            if term.dependency.complete_name not in self._decisions
+            if term is not None and term.dependency.complete_name not in self._decisions
         ]
 
     def decide(self, package: Package) -> None:
@@ -155,11 +155,11 @@ class PartialSolution:
         negative_by_ref = self._negative.get(name)
         old_negative = None if negative_by_ref is None else negative_by_ref.get(ref)
         if old_negative is None:
-            term = assignment
+            term: Term | None = assignment
         else:
             term = assignment.intersect(old_negative)
 
-        if term.is_positive():
+        if term is not None and term.is_positive():
             if name in self._negative:
                 del self._negative[name]
 
@@ -206,7 +206,7 @@ class PartialSolution:
     def satisfies(self, term: Term) -> bool:
         return self.relation(term) == SetRelation.SUBSET
 
-    def relation(self, term: Term) -> int:
+    def relation(self, term: Term) -> str:
         positive = self._positive.get(term.dependency.complete_name)
         if positive is not None:
             return positive.relation(term)

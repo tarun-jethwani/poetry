@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from poetry.core.packages.package import Package
     from poetry.core.packages.project_package import ProjectPackage
 
+    from poetry.packages.dependency_package import DependencyPackage
     from poetry.puzzle.provider import Provider
-
 
 _conflict = object()
 
@@ -122,7 +122,7 @@ class VersionSolver:
                     changed.add(str(self._propagate_incompatibility(root_cause)))
                     break
                 elif result is not None:
-                    changed.add(result)
+                    changed.add(str(result))
 
     def _propagate_incompatibility(
         self, incompatibility: Incompatibility
@@ -250,6 +250,9 @@ class VersionSolver:
             # than a derivation), then incompatibility is the root cause. We then
             # backjump to previous_satisfier_level, where incompatibility is
             # guaranteed to allow _propagate to produce more assignments.
+
+            # using assert to suppress mypy [union-attr]
+            assert most_recent_satisfier is not None
             if (
                 previous_satisfier_level < most_recent_satisfier.decision_level
                 or most_recent_satisfier.cause is None
@@ -366,7 +369,7 @@ class VersionSolver:
                 )
                 return dependency.complete_name
 
-            package = None
+            package: DependencyPackage | None = None
             if dependency.name not in self._use_latest:
                 # prefer locked version of compatible (not exact same) dependency;
                 # required in order to not unnecessarily update dependencies with
@@ -391,6 +394,8 @@ class VersionSolver:
         else:
             package = locked
 
+        # using asserts to suppress mypy [arg-type]
+        assert package is not None
         package = self._provider.complete_package(package)
 
         conflict = False

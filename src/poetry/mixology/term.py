@@ -46,7 +46,7 @@ class Term:
             and self.relation(other) == SetRelation.SUBSET
         )
 
-    def relation(self, other: Term) -> int:
+    def relation(self, other: Term) -> str:
         """
         Returns the relationship between the package versions
         allowed by this term and another.
@@ -140,7 +140,7 @@ class Term:
         else:
             return None
 
-    def difference(self, other: Term) -> Term:
+    def difference(self, other: Term) -> Term | None:
         """
         Returns a Term that represents packages
         allowed by this term and not by the other
