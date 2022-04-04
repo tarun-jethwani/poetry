@@ -44,7 +44,7 @@ class PartialSolution:
         # map.
         #
         # This is derived from self._assignments.
-        self._negative: dict[str, dict[str, Term | None]] = {}
+        self._negative: dict[str, dict[str, Term]] = {}
 
         # The number of distinct solutions that have been attempted so far.
         self._attempted_solutions = 1
@@ -154,10 +154,10 @@ class PartialSolution:
         ref = assignment.dependency.complete_name
         negative_by_ref = self._negative.get(name)
         old_negative = None if negative_by_ref is None else negative_by_ref.get(ref)
-        if old_negative is None:
-            term: Term | None = assignment
-        else:
-            term = assignment.intersect(old_negative)
+        term = (
+            assignment if old_negative is None else assignment.intersect(old_negative)
+        )
+        assert term is not None
 
         if term is not None and term.is_positive():
             if name in self._negative:

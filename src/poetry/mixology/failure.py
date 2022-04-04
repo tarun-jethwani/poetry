@@ -137,8 +137,8 @@ class _Writer:
                 if conflict_line is not None:
                     with_line = cause.conflict
                     without_line = cause.other
-                    line: int | None = conflict_line
-                else:
+                    line = conflict_line
+                elif other_line is not None:
                     with_line = cause.other
                     without_line = cause.conflict
                     line = other_line
