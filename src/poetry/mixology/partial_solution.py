@@ -36,7 +36,7 @@ class PartialSolution:
         # negative Assignments that refer to that package.
         #
         # This is derived from self._assignments.
-        self._positive: dict[str, Term | None] = {}
+        self._positive: dict[str, Term] = {}
 
         # The union of all negative Assignments for each package.
         #
@@ -147,8 +147,9 @@ class PartialSolution:
         name = assignment.dependency.complete_name
         old_positive = self._positive.get(name)
         if old_positive is not None:
-            self._positive[name] = old_positive.intersect(assignment)
-
+            term = old_positive.intersect(assignment)
+            assert term is not None
+            self._positive[name] = term
             return
 
         ref = assignment.dependency.complete_name
