@@ -41,7 +41,7 @@ class Assignment(Term):
         return self._index
 
     @property
-    def cause(self) -> Incompatibility | None:
+    def cause(self) -> Incompatibility:
         return self._cause
 
     @classmethod

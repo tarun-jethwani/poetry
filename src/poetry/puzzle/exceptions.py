@@ -1,20 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-
-if TYPE_CHECKING:
-    from poetry.mixology.failure import SolveFailure
-
 
 class SolverProblemError(Exception):
-    def __init__(self, error: SolveFailure) -> None:
+    def __init__(self, error: Exception) -> None:
         self._error = error
 
         super().__init__(str(error))
 
     @property
-    def error(self) -> SolveFailure:
+    def error(self) -> Exception:
         return self._error
 
 

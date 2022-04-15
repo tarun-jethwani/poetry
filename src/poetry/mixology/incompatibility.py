@@ -50,15 +50,15 @@ class Incompatibility:
                 ref = term.dependency.complete_name
 
                 if ref in by_ref:
-                    intersect = by_ref[ref].intersect(term)
+                    by_ref[ref] = by_ref[ref].intersect(term)
+
                     # If we have two terms that refer to the same package but have a
                     # null intersection, they're mutually exclusive, making this
                     # incompatibility irrelevant, since we already know that mutually
                     # exclusive version ranges are incompatible. We should never derive
                     # an irrelevant incompatibility.
                     err_msg = f"Package '{ref}' is listed as a dependency of itself."
-                    assert intersect is not None, err_msg
-                    by_ref[ref] = intersect
+                    assert by_ref[ref] is not None, err_msg
                 else:
                     by_ref[ref] = term
 
@@ -83,13 +83,23 @@ class Incompatibility:
         return self._terms
 
     @property
-    def cause(self) -> IncompatibilityCause:
+    def cause(
+        self,
+    ) -> (
+        RootCause
+        | NoVersionsCause
+        | DependencyCause
+        | ConflictCause
+        | PythonCause
+        | PlatformCause
+        | PackageNotFoundCause
+    ):
         return self._cause
 
     @property
     def external_incompatibilities(
         self,
-    ) -> Iterator[Incompatibility]:
+    ) -> Iterator[ConflictCause | Incompatibility]:
         """
         Returns all external incompatibilities in this incompatibility's
         derivation graph.
@@ -124,18 +134,18 @@ class Incompatibility:
             assert len(self._terms) == 1
             assert self._terms[0].is_positive()
 
-            python_cause: PythonCause = self._cause
+            cause: PythonCause = self._cause
             text = f"{self._terse(self._terms[0], allow_every=True)} requires "
-            text += f"Python {python_cause.python_version}"
+            text += f"Python {cause.python_version}"
 
             return text
         elif isinstance(self._cause, PlatformCause):
             assert len(self._terms) == 1
             assert self._terms[0].is_positive()
 
-            platform_cause: PlatformCause = self._cause
+            cause: PlatformCause = self._cause
             text = f"{self._terse(self._terms[0], allow_every=True)} requires "
-            text += f"platform {platform_cause.platform}"
+            text += f"platform {cause.platform}"
 
             return text
         elif isinstance(self._cause, NoVersionsCause):
@@ -297,11 +307,7 @@ class Incompatibility:
         return "".join(buffer)
 
     def _try_requires_through(
-        self,
-        other: Incompatibility,
-        details: dict,
-        this_line: int | None,
-        other_line: int | None,
+        self, other: Incompatibility, details: dict, this_line: int, other_line: int
     ) -> str | None:
         if len(self._terms) == 1 or len(other.terms) == 1:
             return None
@@ -379,11 +385,7 @@ class Incompatibility:
         return "".join(buffer)
 
     def _try_requires_forbidden(
-        self,
-        other: Incompatibility,
-        details: dict,
-        this_line: int | None,
-        other_line: int | None,
+        self, other: Incompatibility, details: dict, this_line: int, other_line: int
     ) -> str | None:
         if len(self._terms) != 1 and len(other.terms) != 1:
             return None

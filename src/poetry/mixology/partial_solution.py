@@ -69,7 +69,7 @@ class PartialSolution:
         return [
             term.dependency
             for term in self._positive.values()
-            if term is not None and term.dependency.complete_name not in self._decisions
+            if term.dependency.complete_name not in self._decisions
         ]
 
     def decide(self, package: Package) -> None:
@@ -147,20 +147,19 @@ class PartialSolution:
         name = assignment.dependency.complete_name
         old_positive = self._positive.get(name)
         if old_positive is not None:
-            term = old_positive.intersect(assignment)
-            assert term is not None
-            self._positive[name] = term
+            self._positive[name] = old_positive.intersect(assignment)
+
             return
 
         ref = assignment.dependency.complete_name
         negative_by_ref = self._negative.get(name)
         old_negative = None if negative_by_ref is None else negative_by_ref.get(ref)
-        term = (
-            assignment if old_negative is None else assignment.intersect(old_negative)
-        )
-        assert term is not None
+        if old_negative is None:
+            term = assignment
+        else:
+            term = assignment.intersect(old_negative)
 
-        if term is not None and term.is_positive():
+        if term.is_positive():
             if name in self._negative:
                 del self._negative[name]
 
@@ -207,7 +206,7 @@ class PartialSolution:
     def satisfies(self, term: Term) -> bool:
         return self.relation(term) == SetRelation.SUBSET
 
-    def relation(self, term: Term) -> str:
+    def relation(self, term: Term) -> int:
         positive = self._positive.get(term.dependency.complete_name)
         if positive is not None:
             return positive.relation(term)

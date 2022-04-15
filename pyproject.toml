@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry"
-version = "1.2.0a2"
+version = "1.2.0-beta.1"
 description = "Python dependency management and packaging made easy."
 authors = [
     "Sébastien Eustace <sebastien@eustace.io>"
@@ -89,7 +89,7 @@ extend_skip = ["setup.py"]
 
 [tool.black]
 target-version = ['py37']
-experimental_string_processing = true
+preview = true
 force-exclude = '''
 .*/setup\.py$
 '''
@@ -112,7 +112,6 @@ files = "src"
 
 [[tool.mypy.overrides]]
 module = [
-  'poetry.console.application',
   'poetry.console.logging.formatters.builder_formatter',
   'poetry.console.commands.init',
   'poetry.inspection.info',
@@ -121,6 +120,14 @@ module = [
   'poetry.installation.executor',
   'poetry.installation.installer',
   'poetry.installation.pip_installer',
+  'poetry.mixology.assignment',
+  'poetry.mixology.failure',
+  'poetry.mixology.incompatibility',
+  'poetry.mixology.partial_solution',
+  'poetry.mixology.solutions.providers.python_requirement_solution_provider',
+  'poetry.mixology.solutions.solutions.python_requirement_solution',
+  'poetry.mixology.term',
+  'poetry.mixology.version_solver',
   'poetry.repositories.installed_repository',
   'poetry.utils.appdirs',
   'poetry.utils.authenticator',
@@ -129,7 +136,7 @@ module = [
   'poetry.utils.password_manager',
   'poetry.utils.setup_reader',
 ]
- ignore_errors = true
+ignore_errors = true
 
 
 [tool.coverage.report]
